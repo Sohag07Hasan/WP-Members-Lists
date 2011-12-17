@@ -79,7 +79,16 @@ class tern_members {
 		}
 		
 		$r .= '<ul class="tern_wp_members_list">';
-		foreach($this->r as $u) {
+		
+		/*
+		var_dump($this->r);
+		echo '<br/>';
+		var_dump($this->total);
+		exit;
+			*/
+				
+		foreach($this->r as $u) {			
+					
 			//get user info
 			$u = new WP_User($u);
 			//compile name to be displayed
@@ -154,6 +163,7 @@ class tern_members {
 		
 		$this->q = "select distinct a.ID from $wpdb->users as a ".$this->q;
 		$this->tq = "select COUNT(distinct a.ID) from $wpdb->users as a ".$this->tq;
+				
 	}
 	function join() {
 		global $wpdb,$tern_wp_user_fields;
@@ -285,8 +295,21 @@ class tern_members {
 		$this->order();
 		$this->limit();
 		$this->select();
-		$this->r = $wpdb->get_col($this->q);
+		$this->r = $wpdb->get_col($this->q);		
 		$this->total = intval($wpdb->get_var($this->tq));
+		
+		$users = array();
+		foreach($this->r as $id){
+			$modal = get_user_meta($id,'_tern_wp_member_list',true);
+			if(strlen($modal)<3) :
+				$this->total = $this->total - 1;
+				continue;
+			endif;
+			$users[] = $id;
+		}	
+		
+		$this->r = $users;
+			
 		return $this->r;
 	}
 	function pagination($z=false) {
